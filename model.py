@@ -1,5 +1,7 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision import models
 
 nclasses = 500
 
@@ -20,3 +22,51 @@ class Net(nn.Module):
         x = x.view(-1, 320)
         x = F.relu(self.fc1(x))
         return self.fc2(x)
+
+
+
+
+class CustomEfficientNetB3(nn.Module):
+    def __init__(self, num_classes=500, fine_tune=True):
+        super(CustomEfficientNetB3, self).__init__()
+        # Charger le modèle EfficientNet-B3 pré-entraîné
+        self.model = models.efficientnet_b3(weights=models.EfficientNet_B3_Weights.IMAGENET1K_V1)
+
+        # Fine-tuning : geler toutes les couches sauf les dernières
+        if fine_tune:
+            for param in self.model.parameters():
+                param.requires_grad = False
+            for param in self.model.features[-1].parameters():
+                param.requires_grad = True
+        
+        # Remplacer la couche de sortie pour 500 classes
+        in_features = self.model.classifier[1].in_features
+        self.model.classifier = nn.Sequential(
+            nn.Dropout(p=0.3, inplace=True),
+            nn.Linear(in_features, num_classes)
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+
+
+class CustomVGG16(nn.Module):
+    def __init__(self, num_classes=500, fine_tune=True):
+        super(CustomVGG16, self).__init__()
+        # Charger le modèle VGG-16 pré-entraîné
+        self.model = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_V1)
+
+        # Fine-tuning : geler toutes les couches sauf la dernière couche
+        if fine_tune:
+            for param in self.model.parameters():
+                param.requires_grad = False
+            for param in self.model.classifier[-1].parameters():
+                param.requires_grad = True
+
+        # Remplacer la dernière couche pour 500 classes
+        in_features = self.model.classifier[-1].in_features
+        self.model.classifier[-1] = nn.Linear(in_features, num_classes)
+
+    def forward(self, x):
+        return self.model(x)
