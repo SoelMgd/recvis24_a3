@@ -189,7 +189,7 @@ def main():
         os.makedirs(args.experiment)
 
     # load model and transform
-    model, data_transforms = ModelFactory(args.model_name).get_all()
+    model, data_transforms = ModelFactory(args.model_name, train_mode=True).get_all()
     if use_cuda:
         print("Using GPU")
         model.cuda()
