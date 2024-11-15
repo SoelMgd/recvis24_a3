@@ -137,8 +137,8 @@ class EnsembleModel(nn.Module):
         # Charger EfficientNet-B3
         self.model1 = CustomEfficientNetB3(num_classes=500, fine_tune=False)
         self.model1.load_state_dict(torch.load("/kaggle/working/recvis24_a3/saved_models/model_unknown.pth"))
-        self.model1 = self.model1.features
-        #self.model1 = nn.Sequential(*list(self.model1.children())[:-1])  # Retirer la dernière couche
+        #self.model1 = self.model1.features
+        self.model1 = nn.Sequential(*list(self.model1.children())[:-2])  # Retirer la dernière couche
 
         # Charger ResNet-50
         self.model2 = CustomResNet50(num_classes=500)
