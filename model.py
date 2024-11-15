@@ -156,8 +156,12 @@ class EnsembleModel(nn.Module):
         for param in self.model2.parameters():
             param.requires_grad = False
 
-        # Créer la nouvelle couche fully connected pour la sortie combinée
-        self.fc = nn.Linear(1536 + 2048, num_classes)  # Adapter les dimensions en fonction des modèles
+        for param in self.model1[-1].parameters():
+            param.requires_grad = True
+        for param in self.model2[-1].parameters():
+            param.requires_grad = True
+
+        self.fc = nn.Sequential(nn.Linear(1536 + 2048, 1024),nn.ReLU(),nn.Dropout(0.3),nn.Linear(1024, num_classes))
 
     def forward(self, x):
         # Extraire les caractéristiques de chaque modèle de base
