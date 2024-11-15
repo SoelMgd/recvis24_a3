@@ -26,8 +26,8 @@ class ModelFactory:
         if self.model_name == "resnet50":
             print("Loading resnet50 model")
             return CustomResNet50(num_classes=500)
-        if self.model_name == "resnet50":
-            print("Loading resnet50 model")
+        if self.model_name == "ensemble":
+            print("Loading ensemble model")
             return EnsembleModel(num_classes=500)
         
         else:
