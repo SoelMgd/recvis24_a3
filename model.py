@@ -96,8 +96,6 @@ class CustomVGG16(nn.Module):
         return self.model(x)
 
 
-import torch.nn as nn
-
 class CustomEfficientNetM(nn.Module):
     def __init__(self, num_classes=500, model_name="efficientnet_v2_m"):
         super(CustomEfficientNetM, self).__init__()
@@ -131,3 +129,39 @@ class CustomResNet50(nn.Module):
     def forward(self, x):
         return self.model(x)
 
+
+class EnsembleModel(nn.Module):
+    def __init__(self, num_classes=500):
+        super(EnsembleModel, self).__init__()
+
+        # Charger EfficientNet-B3
+        self.model1 = models.efficientnet_b3(weights=None)
+        self.model1.load_state_dict(torch.load("saved_models\model_unknown.pth")) #c'est le nom de mon efficientnetb3
+        self.model1 = nn.Sequential(*list(self.model1.children())[:-1])  # Retirer la dernière couche
+
+        # Charger ResNet-50
+        self.model2 = models.resnet50(weights=None)
+        self.model2.load_state_dict(torch.load("saved_models\ResNet50.pth"))
+        self.model2 = nn.Sequential(*list(self.model2.children())[:-1])  # Retirer la dernière couche
+
+        # Geler les paramètres des modèles de base
+        for param in self.model1.parameters():
+            param.requires_grad = False
+        for param in self.model2.parameters():
+            param.requires_grad = False
+
+        # Créer la nouvelle couche fully connected pour la sortie combinée
+        self.fc = nn.Linear(1280 + 2048, num_classes)  # Adapter les dimensions en fonction des modèles
+
+    def forward(self, x):
+        # Extraire les caractéristiques de chaque modèle de base
+        feat1 = self.model1(x)
+        feat2 = self.model2(x)
+
+        # Aplatir et concaténer les caractéristiques
+        combined_features = torch.cat([feat1.view(feat1.size(0), -1),
+                                       feat2.view(feat2.size(0), -1)], dim=1)
+        
+        # Passer par la dernière couche pour la classification finale
+        out = self.fc(combined_features)
+        return out

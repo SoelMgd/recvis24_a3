@@ -1,7 +1,7 @@
 """Python file to instantite the model and the transform that goes with it."""
 
 from data import train_transforms, test_transforms
-from model import CustomEfficientNetB3, CustomVGG16, CustomEfficientNetM, CustomResNet50, CustomEfficientNetB4
+from model import CustomEfficientNetB3, CustomVGG16, CustomEfficientNetM, CustomResNet50, CustomEfficientNetB4, EnsembleModel
 
 
 class ModelFactory:
@@ -26,6 +26,9 @@ class ModelFactory:
         if self.model_name == "resnet50":
             print("Loading resnet50 model")
             return CustomResNet50(num_classes=500)
+        if self.model_name == "resnet50":
+            print("Loading resnet50 model")
+            return EnsembleModel(num_classes=500)
         
         else:
             raise NotImplementedError("Model not implemented")
