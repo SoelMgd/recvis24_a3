@@ -39,7 +39,7 @@ train_transforms = transforms.Compose([
     transforms.Normalize(mean=[0.5], std=[0.5]),
 ])
 
-
+'''
 # Définition des transformations pour l'entraînement avec data augmentation
 train_transforms_old = transforms.Compose([
     transforms.Resize((224, 224)),
@@ -51,7 +51,7 @@ train_transforms_old = transforms.Compose([
     transforms.RandomApply([LightenImage(factor=1.5)], p=0.4),  # Éclaircissement avec probabilité de 50%
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5], std=[0.5]),
-])
+])'''
 
 
 
