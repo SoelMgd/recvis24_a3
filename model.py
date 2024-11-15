@@ -138,7 +138,8 @@ class EnsembleModel(nn.Module):
         self.model1 = CustomEfficientNetB3(num_classes=500, fine_tune=False)
         self.model1.load_state_dict(torch.load("/kaggle/working/recvis24_a3/saved_models/model_unknown.pth"))
         #self.model1 = self.model1.features
-        self.model1 = self.model.model.features  # Accéder aux caractéristiques convolutionnelles directement
+        self.model1 = self.model1.model.features  # Accéder aux caractéristiques convolutionnelles directement
+        # test
 
         #self.model1 = nn.Sequential(*list(self.model1.children())[:-2])  # Retirer la dernière couche
 
@@ -148,8 +149,7 @@ class EnsembleModel(nn.Module):
         #self.model2 = nn.Sequential(*list(self.model2.children())[:-1])  # Retirer la dernière couche
         self.model2 = nn.Sequential(*list(self.model2.children())[:-2], nn.AdaptiveAvgPool2d((1, 1)))
 
-        #ceci est un test
-
+    
 
         # Geler les paramètres des modèles de base
         for param in self.model1.parameters():
