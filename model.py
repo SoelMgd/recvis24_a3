@@ -165,6 +165,9 @@ class EnsembleModel(nn.Module):
         feat1 = self.model1(x)
         feat2 = self.model2(x)
 
+        feat1 = feat1.mean([2, 3])  # Réduit [16, 1536, 7, 7] à [16, 1536]
+        feat2 = feat2.view(feat2.size(0), -1)  # Réduit [16, 2048, 1, 1] à [16, 2048]
+
         # Afficher les dimensions des sorties
         print("EfficientNet-B3 features shape:", feat1.shape)  # Vérifiez la dimension
         print("ResNet-50 features shape:", feat2.shape)        # Vérifiez la dimension
