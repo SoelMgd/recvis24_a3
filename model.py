@@ -30,7 +30,7 @@ class CustomEfficientNetB3(nn.Module):
     def __init__(self, num_classes=500, fine_tune=True):
         super(CustomEfficientNetB3, self).__init__()
         # Charger le modèle EfficientNet-B3 pré-entraîné
-        self.model = models.efficientnet_b3(weights=models.EfficientNet_B4_Weights.IMAGENET1K_V1)
+        self.model = models.efficientnet_b3(weights=models.EfficientNet_B3_Weights.IMAGENET1K_V1)
 
         # Fine-tuning : geler toutes les couches sauf les dernières
         if fine_tune:
