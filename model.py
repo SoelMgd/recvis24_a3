@@ -30,6 +30,30 @@ class CustomEfficientNetB3(nn.Module):
     def __init__(self, num_classes=500, fine_tune=True):
         super(CustomEfficientNetB3, self).__init__()
         # Charger le modèle EfficientNet-B3 pré-entraîné
+        self.model = models.efficientnet_b3(weights=models.EfficientNet_B4_Weights.IMAGENET1K_V1)
+
+        # Fine-tuning : geler toutes les couches sauf les dernières
+        if fine_tune:
+            for param in self.model.parameters():
+                param.requires_grad = False
+            for param in self.model.features[-1].parameters():
+                param.requires_grad = True
+        
+        # Remplacer la couche de sortie pour 500 classes
+        in_features = self.model.classifier[1].in_features
+        self.model.classifier = nn.Sequential(
+            nn.Dropout(p=0.3, inplace=True),
+            nn.Linear(in_features, num_classes)
+        )
+
+    def forward(self, x):
+        return self.model(x)
+    
+
+class CustomEfficientNetB4(nn.Module):
+    def __init__(self, num_classes=500, fine_tune=True):
+        super(CustomEfficientNetB4, self).__init__()
+        # Charger le modèle EfficientNet-B4 pré-entraîné
         self.model = models.efficientnet_b4(weights=models.EfficientNet_B4_Weights.IMAGENET1K_V1)
 
         # Fine-tuning : geler toutes les couches sauf les dernières
