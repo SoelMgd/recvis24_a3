@@ -149,7 +149,7 @@ class EnsembleModel(nn.Module):
         self.model2.load_state_dict(torch.load("/kaggle/working/recvis24_a3/saved_models/ResNet50.pth"))
         self.model2 = self.model2.get_features()
 
-
+        '''
         # Geler les paramètres des modèles de base
         for param in self.model1.parameters():
             param.requires_grad = False
@@ -159,7 +159,7 @@ class EnsembleModel(nn.Module):
         for param in self.model1[-1].parameters():
             param.requires_grad = True
         for param in self.model2[-1].parameters():
-            param.requires_grad = True
+            param.requires_grad = True'''
 
         self.fc = nn.Sequential(nn.Linear(1536 + 2048, 1024),nn.ReLU(),nn.Dropout(0.3),nn.Linear(1024, num_classes))
 
