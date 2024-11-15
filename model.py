@@ -128,6 +128,10 @@ class CustomResNet50(nn.Module):
 
     def forward(self, x):
         return self.model(x)
+    
+    def get_features(self):
+        # Retourne les couches convolutionnelles sans la dernière couche fully connected
+        return nn.Sequential(*list(self.model.children())[:-2], nn.AdaptiveAvgPool2d((1, 1)))
 
 
 class EnsembleModel(nn.Module):
@@ -137,19 +141,14 @@ class EnsembleModel(nn.Module):
         # Charger EfficientNet-B3
         self.model1 = CustomEfficientNetB3(num_classes=500, fine_tune=False)
         self.model1.load_state_dict(torch.load("/kaggle/working/recvis24_a3/saved_models/model_unknown.pth"))
-        #self.model1 = self.model1.features
         self.model1 = self.model1.model.features  # Accéder aux caractéristiques convolutionnelles directement
-        # test
 
-        #self.model1 = nn.Sequential(*list(self.model1.children())[:-2])  # Retirer la dernière couche
 
         # Charger ResNet-50
         self.model2 = CustomResNet50(num_classes=500)
         self.model2.load_state_dict(torch.load("/kaggle/working/recvis24_a3/saved_models/ResNet50.pth"))
-        #self.model2 = nn.Sequential(*list(self.model2.children())[:-1])  # Retirer la dernière couche
-        self.model2 = nn.Sequential(*list(self.model2.children())[:-2], nn.AdaptiveAvgPool2d((1, 1)))
+        self.model2 = self.model2.get_features()
 
-    
 
         # Geler les paramètres des modèles de base
         for param in self.model1.parameters():
@@ -165,17 +164,19 @@ class EnsembleModel(nn.Module):
         feat1 = self.model1(x)
         feat2 = self.model2(x)
 
+        # Réduire les dimensions avec Global Average Pooling pour EfficientNet-B3
         feat1 = feat1.mean([2, 3])  # Réduit [16, 1536, 7, 7] à [16, 1536]
+
+        # Aplatir les caractéristiques de ResNet-50
         feat2 = feat2.view(feat2.size(0), -1)  # Réduit [16, 2048, 1, 1] à [16, 2048]
 
-        # Afficher les dimensions des sorties
-        print("EfficientNet-B3 features shape:", feat1.shape)  # Vérifiez la dimension
-        print("ResNet-50 features shape:", feat2.shape)        # Vérifiez la dimension
+        # Vérifier les dimensions
+        print("EfficientNet-B3 features shape:", feat1.shape)  # Devrait être [16, 1536]
+        print("ResNet-50 features shape:", feat2.shape)        # Devrait être [16, 2048]
 
-        # Aplatir et concaténer les caractéristiques
-        combined_features = torch.cat([feat1.view(feat1.size(0), -1),
-                                    feat2.view(feat2.size(0), -1)], dim=1)
-        print("Combined features shape:", combined_features.shape)  # Vérifiez la dimension après concaténation
+        # Concaténer les caractéristiques
+        combined_features = torch.cat([feat1, feat2], dim=1)
+        print("Combined features shape:", combined_features.shape)  # Devrait être [16, 3584]
 
         # Passer par la dernière couche pour la classification finale
         out = self.fc(combined_features)
