@@ -171,12 +171,12 @@ class EnsembleModel(nn.Module):
         feat2 = feat2.view(feat2.size(0), -1)  # Réduit [16, 2048, 1, 1] à [16, 2048]
 
         # Vérifier les dimensions
-        print("EfficientNet-B3 features shape:", feat1.shape)  # Devrait être [16, 1536]
-        print("ResNet-50 features shape:", feat2.shape)        # Devrait être [16, 2048]
+        #print("EfficientNet-B3 features shape:", feat1.shape)  # Devrait être [16, 1536]
+        #print("ResNet-50 features shape:", feat2.shape)        # Devrait être [16, 2048]
 
         # Concaténer les caractéristiques
         combined_features = torch.cat([feat1, feat2], dim=1)
-        print("Combined features shape:", combined_features.shape)  # Devrait être [16, 3584]
+        #print("Combined features shape:", combined_features.shape)  # Devrait être [16, 3584]
 
         # Passer par la dernière couche pour la classification finale
         out = self.fc(combined_features)
