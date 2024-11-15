@@ -150,16 +150,18 @@ def validation(
     model.eval()
     validation_loss = 0
     correct = 0
-    for data, target in val_loader:
-        if use_cuda:
-            data, target = data.cuda(), target.cuda()
-        output = model(data)
-        # sum up batch loss
-        criterion = torch.nn.CrossEntropyLoss(reduction="mean")
-        validation_loss += criterion(output, target).data.item()
-        # get the index of the max log-probability
-        pred = output.data.max(1, keepdim=True)[1]
-        correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+
+    with torch.no_grad():
+        for data, target in val_loader:
+            if use_cuda:
+                data, target = data.cuda(), target.cuda()
+            output = model(data)
+            # sum up batch loss
+            criterion = torch.nn.CrossEntropyLoss(reduction="mean")
+            validation_loss += criterion(output, target).data.item()
+            # get the index of the max log-probability
+            pred = output.data.max(1, keepdim=True)[1]
+            correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
     validation_loss /= len(val_loader.dataset)
     print(
